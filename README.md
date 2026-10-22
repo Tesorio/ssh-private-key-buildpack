@@ -30,3 +30,11 @@ Set the private key environment variable `SSH_KEY` of your Heroku app (note that
 By default the buildback adds Github to `known_hosts`. However you can configure your app to allow custom hosts, too. All that's needed is the set `SSH_HOSTS` for you app to a comma-separated list of hosts, e.g. `git@github.com,example.com`
 
     $ heroku config:set SSH_HOSTS="git@github.com,example.com"
+
+## Configure a GitHub token (optional)
+
+A deploy key can read only one repository. To install dependencies from several private GitHub repositories, set `GITHUB_TOKEN` to a token with read access to them:
+
+    $ heroku config:set GITHUB_TOKEN=<token>
+
+The buildpack then rewrites `ssh://git@github.com/` and `git@github.com:` URLs to HTTPS with the token, in `$HOME/.gitconfig` for the rest of the build. The token is not written to the slug. Apps without `GITHUB_TOKEN` do not change.

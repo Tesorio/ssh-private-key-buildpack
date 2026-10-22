@@ -9,7 +9,17 @@ function indent() {
 }
 
 ENV_DIR=${3:-}
-ssh_key="$(cat $ENV_DIR/SSH_KEY)"
+
+# One token can read several private repos; a deploy key (SSH_KEY) only reads one.
+# Written to $HOME, not the build dir, so the token does not end up in the slug.
+if [ -s "$ENV_DIR/GITHUB_TOKEN" ]; then
+	echo "-----> Rewriting GitHub SSH URLs to HTTPS with GITHUB_TOKEN"
+	github_url="https://x-access-token:$(cat "$ENV_DIR/GITHUB_TOKEN")@github.com/"
+	git config --global --add url."$github_url".insteadOf "ssh://git@github.com/"
+	git config --global --add url."$github_url".insteadOf "git@github.com:"
+fi
+
+ssh_key="$(cat $ENV_DIR/SSH_KEY 2>/dev/null)"
 ssh_hosts=${SSH_HOSTS:-"git@github.com"}
 
 if [ "$ssh_key" != "" ]; then
